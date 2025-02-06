@@ -80,12 +80,10 @@
 
         let croppedCanvas = cropper.getCroppedCanvas();
         let resizeWidth = parseInt(
-          document.getElementById("resizeWidth").value,
-          10
+          document.getElementById("resizeWidth").value
         );
         let resizeHeight = parseInt(
-          document.getElementById("resizeHeight").value,
-          10
+          document.getElementById("resizeHeight").value
         );
 
         if (
@@ -108,6 +106,9 @@
         finalCanvas.style.display = "block";
       }
 
+      /**
+       * Create an array of pixel data and send it to Google Sheets
+       */
       function sendToGoogleSheets() {
         let canvas = document.getElementById("canvas");
         let ctx = canvas.getContext("2d");
