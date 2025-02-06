@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop and Resize Image</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      img {
+        max-width: 100%;
+      }
+      #canvas {
+        display: none;
+      }
+      .crop-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Upload and Crop Image</h2>
+
+    <input type="file" id="fileInput" accept="image/*" /><br /><br />
+
+    <div class="crop-container">
+      <img id="image" style="max-width: 100%" />
+    </div>
+
+    <label>Resize to (Width x Height in pixels):</label>
+    <input type="number" id="resizeWidth" placeholder="Width" value="200" />
+    <input type="number" id="resizeHeight" placeholder="Height" value="200" />
+
+    <br /><br />
+    <button onclick="cropAndResize()">Crop & Resize</button>
+
+    <h3>Preview:</h3>
+    <canvas id="canvas"></canvas>
+
+    <script>
+      let cropper;
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (event) {
+          let file = event.target.files[0];
+          if (!file) return;
+
+          let reader = new FileReader();
+          reader.onload = function (e) {
+            let img = document.getElementById("image");
+            img.src = e.target.result;
+
+            if (cropper) {
+              cropper.destroy();
+            }
+
+            cropper = new Cropper(img, {
+              aspectRatio: NaN, // Freeform crop
+              viewMode: 1,
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+
+      function cropAndResize() {
+        if (!cropper) {
+          alert("Please upload and crop an image first.");
+          return;
+        }
+
+        let croppedCanvas = cropper.getCroppedCanvas();
+        let resizeWidth = parseInt(
+          document.getElementById("resizeWidth").value,
+          10
+        );
+        let resizeHeight = parseInt(
+          document.getElementById("resizeHeight").value,
+          10
+        );
+
+        if (
+          isNaN(resizeWidth) ||
+          isNaN(resizeHeight) ||
+          resizeWidth <= 0 ||
+          resizeHeight <= 0
+        ) {
+          alert("Please enter valid width and height values.");
+          return;
+        }
+
+        let finalCanvas = document.getElementById("canvas");
+        finalCanvas.width = resizeWidth;
+        finalCanvas.height = resizeHeight;
+
+        let ctx = finalCanvas.getContext("2d");
+        ctx.drawImage(croppedCanvas, 0, 0, resizeWidth, resizeHeight);
+
+        finalCanvas.style.display = "block";
+      }
+    </script>
+  </body>
+</html>
