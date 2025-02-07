@@ -124,6 +124,40 @@
 
         finalCanvas.style.display = "block";
       }
+
+      /**
+       * Create an array of pixel data and send it to Google Sheets
+       */
+      function sendToGoogleSheets() {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let imageData = ctx.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        ).data;
+        let width = canvas.width;
+        let height = canvas.height;
+
+        let pixelData = [];
+
+        for (let y = 0; y < height; y++) {
+          let row = [];
+          for (let x = 0; x < width; x++) {
+            let index = (y * width + x) * 4;
+            let r = imageData[index];
+            let g = imageData[index + 1];
+            let b = imageData[index + 2];
+            row.push([r, g, b]); // Store RGB values
+          }
+          pixelData.push(row);
+        }
+
+        console.log(pixelData);
+
+        google.script.run.applyPixelDataToSheet(pixelData);
+      }
     </script>
   </body>
 </html>
