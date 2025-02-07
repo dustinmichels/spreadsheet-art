@@ -49,6 +49,10 @@
 
     <script>
       let cropper;
+      const image = document.getElementById("image");
+      const resizeWidthInput = document.getElementById("resizeWidth");
+      const resizeHeightInput = document.getElementById("resizeHeight");
+
       document
         .getElementById("fileInput")
         .addEventListener("change", function (event) {
@@ -57,20 +61,39 @@
 
           let reader = new FileReader();
           reader.onload = function (e) {
-            let img = document.getElementById("image");
-            img.src = e.target.result;
+            image.src = e.target.result;
 
             if (cropper) {
               cropper.destroy();
             }
 
-            cropper = new Cropper(img, {
-              aspectRatio: NaN, // Freeform crop
+            cropper = new Cropper(image, {
+              aspectRatio: getAspectRatio(),
               viewMode: 1,
+              cropBoxResizable: false, // Disable resizing handles
+              dragMode: "move", // Prevents resizing, allows moving
             });
           };
           reader.readAsDataURL(file);
         });
+
+      // Function to get aspect ratio from input fields
+      function getAspectRatio() {
+        let width = parseFloat(resizeWidthInput.value);
+        let height = parseFloat(resizeHeightInput.value);
+        return width > 0 && height > 0 ? width / height : NaN;
+      }
+
+      // Update aspect ratio dynamically when input values change
+      function updateAspectRatio() {
+        if (cropper) {
+          let newAspectRatio = getAspectRatio();
+          cropper.setAspectRatio(newAspectRatio);
+        }
+      }
+
+      resizeWidthInput.addEventListener("input", updateAspectRatio);
+      resizeHeightInput.addEventListener("input", updateAspectRatio);
 
       function cropAndResize() {
         if (!cropper) {
@@ -79,12 +102,8 @@
         }
 
         let croppedCanvas = cropper.getCroppedCanvas();
-        let resizeWidth = parseInt(
-          document.getElementById("resizeWidth").value
-        );
-        let resizeHeight = parseInt(
-          document.getElementById("resizeHeight").value
-        );
+        let resizeWidth = parseInt(resizeWidthInput.value);
+        let resizeHeight = parseInt(resizeHeightInput.value);
 
         if (
           isNaN(resizeWidth) ||
@@ -104,40 +123,6 @@
         ctx.drawImage(croppedCanvas, 0, 0, resizeWidth, resizeHeight);
 
         finalCanvas.style.display = "block";
-      }
-
-      /**
-       * Create an array of pixel data and send it to Google Sheets
-       */
-      function sendToGoogleSheets() {
-        let canvas = document.getElementById("canvas");
-        let ctx = canvas.getContext("2d");
-        let imageData = ctx.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        ).data;
-        let width = canvas.width;
-        let height = canvas.height;
-
-        let pixelData = [];
-
-        for (let y = 0; y < height; y++) {
-          let row = [];
-          for (let x = 0; x < width; x++) {
-            let index = (y * width + x) * 4;
-            let r = imageData[index];
-            let g = imageData[index + 1];
-            let b = imageData[index + 2];
-            row.push([r, g, b]); // Store RGB values
-          }
-          pixelData.push(row);
-        }
-
-        console.log(pixelData);
-
-        google.script.run.applyPixelDataToSheet(pixelData);
       }
     </script>
   </body>
