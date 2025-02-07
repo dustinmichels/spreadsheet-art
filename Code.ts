@@ -34,6 +34,38 @@ function resizeCells(): void {
   }
 }
 
+function resetSheetFormatting(): void {
+  const sheet: GoogleAppsScript.Spreadsheet.Sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (!sheet) return;
+
+  const range: GoogleAppsScript.Spreadsheet.Range = sheet.getDataRange();
+  const numCols: number = sheet.getMaxColumns();
+  const numRows: number = sheet.getMaxRows();
+
+  // Reset column widths
+  for (let col = 1; col <= numCols; col++) {
+    sheet.setColumnWidth(col, 100); // Default width
+  }
+
+  // Reset row heights
+  for (let row = 1; row <= numRows; row++) {
+    sheet.setRowHeight(row, 21); // Default height
+  }
+
+  // Clear background colors
+  range.setBackground(null);
+
+  // Clear formatting (optional)
+  range.clearFormat();
+
+  // Optionally clear content and notes (Uncomment if needed)
+  // range.clearContent();
+  // range.clearNote();
+
+  Logger.log("Sheet formatting reset successfully.");
+}
+
 /**
  * Use the pixel data to resize the sheet and apply the colors
  */
@@ -42,6 +74,10 @@ function applyPixelDataToSheet(pixelData: PixelMatrix): void {
   if (!sheet) {
     throw new Error("No active sheet found.");
   }
+
+  // clear existing formats
+  resetSheetFormatting();
+  SpreadsheetApp.flush();
 
   const height: number = pixelData.length;
   const width: number = pixelData[0].length;
