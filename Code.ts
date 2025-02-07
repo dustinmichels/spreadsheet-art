@@ -15,6 +15,28 @@ function openImageUploaderSidebar(): void {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
+// For testing
+function resizeCells(): void {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (!sheet) {
+    throw new Error("No active sheet found.");
+  }
+
+  const cellSize = 10; // Adjust as needed
+  const width = sheet.getMaxColumns();
+  const height = sheet.getMaxRows();
+
+  for (let i = 1; i <= height; i++) {
+    sheet.setRowHeight(i, cellSize);
+  }
+  for (let j = 1; j <= width; j++) {
+    sheet.setColumnWidth(j, cellSize);
+  }
+}
+
+/**
+ * Use the pixel data to resize the sheet and apply the colors
+ */
 function applyPixelDataToSheet(pixelData: PixelMatrix): void {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if (!sheet) {
